@@ -8,6 +8,7 @@ import { Button } from '@/components/ui'
 import { api } from '@/lib/api'
 import type { Category, JournalCard, ProductCard as P } from '@/lib/types'
 import { date } from '@/lib/utils'
+import { mediaUrl } from '@/lib/media'
 
 interface HomeData {
   featured: P[]
@@ -150,7 +151,7 @@ export default function Home() {
           <div className="grid gap-8 md:grid-cols-3">
             {data.journal.map((j) => (
               <Link key={j.slug} to={`/journal/${j.slug}`} className="group">
-                <img src={j.cover_url ?? ''} alt="" className="aspect-[3/2] w-full rounded-xl object-cover" />
+                <img src={mediaUrl(j.cover_url) ?? ''} alt="" className="aspect-[3/2] w-full rounded-xl object-cover" />
                 <div className="mt-3 text-xs text-muted">{date(j.published_at)} · {j.reading_minutes} min read</div>
                 <h3 className="mt-1 text-lg font-semibold group-hover:underline">{j.title}</h3>
                 <p className="mt-1 line-clamp-2 text-sm text-muted">{j.excerpt}</p>

@@ -4,12 +4,14 @@ import { useAddToCart, useRequireAuth, useToggleWishlist } from '@/lib/queries'
 import type { ProductCard as Product } from '@/lib/types'
 import { cn, LIGHT_LABEL, money } from '@/lib/utils'
 import { Badge, Button, Stars } from './ui'
+import { mediaUrl } from '@/lib/media'
 
 export function PlantImage({ src, alt, className, imgClassName }: { src: string | null; alt: string; className?: string; imgClassName?: string }) {
+  const url = mediaUrl(src)
   return (
     <div className={cn('plant-stage', className)}>
-      {src ? (
-        <img src={src} alt={alt} loading="lazy" className={cn('h-full w-full object-contain p-4 transition-transform duration-500', imgClassName)} />
+      {url ? (
+        <img src={url} alt={alt} loading="lazy" className={cn('h-full w-full object-contain p-4 transition-transform duration-500', imgClassName)} />
       ) : (
         <div className="grid h-full place-items-center text-muted"><Sprout className="size-10" /></div>
       )}

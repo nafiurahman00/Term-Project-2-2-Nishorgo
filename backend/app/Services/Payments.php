@@ -134,7 +134,11 @@ class Payments
         if (! $path) {
             return null;
         }
-        $url = str_starts_with($path, 'http') ? $path : $this->frontendUrl.$path;
+        // Seeded catalogue paths ("/plants/rose.webp") live in the product-images
+        // Storage bucket; uploads are already full public URLs.
+        $url = str_starts_with($path, 'http')
+            ? $path
+            : rtrim((string) config('nishorgo.supabase.url'), '/').'/storage/v1/object/public/product-images/'.ltrim($path, '/');
 
         // Stripe can only fetch publicly reachable https images.
         return str_starts_with($url, 'https://') ? [$url] : null;

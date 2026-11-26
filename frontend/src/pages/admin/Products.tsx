@@ -4,13 +4,12 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import { PlantImage } from '@/components/product'
+import { ProductImages } from '@/components/ProductImages'
 import { Badge, Button, Drawer, Field, Input, Modal, PageHeader, Select, Skeleton, Switch, Textarea } from '@/components/ui'
 import { api } from '@/lib/api'
 import { errorToast } from '@/lib/queries'
-import { uploadImage } from '@/lib/supabase'
 import type { Difficulty, Light, Paged, ProductCard, ProductDetail } from '@/lib/types'
 import { cn, DIFFICULTY_LABEL, LIGHT_LABEL, money, timeAgo } from '@/lib/utils'
-import { useAuth } from '@/providers/AuthProvider'
 
 type AdminProduct = ProductCard & { is_active: boolean; low_stock_threshold: number; wishlist_count: number; updated_at: string; stock_30d: { at: string; delta: number; reason: string }[] }
 
@@ -130,23 +129,30 @@ function RestockModal({ product, onClose }: { product: AdminProduct | null; onCl
   )
 }
 
-const empty = { name: '', scientific_name: '', category: 'flowering', short_description: '', description: '', price: 300, compare_at_price: '' as number | string, stock: 10, low_stock_threshold: 5, image_url: '', light: 'bright_indirect' as Light, difficulty: 'easy' as Difficulty, water_every_days: 3, fertilize_every_days: '' as number | string, pet_friendly: false, air_purifying: false, edible: false, tags: '', is_active: true, is_featured: false }
+const empty = { name: '', scientific_name: '', category: 'flowering', short_description: '', description: '', price: 300, compare_at_price: '' as number | string, stock: 10, low_stock_threshold: 5, light: 'bright_indirect' as Light, difficulty: 'easy' as Difficulty, water_every_days: 3, fertilize_every_days: '' as number | string, pet_friendly: false, air_purifying: false, edible: false, tags: '', is_active: true, is_featured: false, images: [] as string[] }
 
 function ProductDrawer({ product, onClose }: { product: AdminProduct | 'new' | null; onClose: () => void }) {
   const qc = useQueryClient()
-  const { user } = useAuth()
   const [f, setF] = useState(empty)
+  // Real category list (the facet query is cheap and already cached for the shop).
+  const categories = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => api.get<{ facets: { categories: { slug: string; name: string }[] } }>('/products', { limit: 1 }),
+    select: (d) => d.facets.categories,
+    staleTime: 5 * 60_000,
+  })
   const detail = useQuery({ queryKey: ['product', product !== 'new' ? product?.slug : ''], queryFn: () => api.get<ProductDetail>(`/products/${(product as AdminProduct).slug}`), enabled: !!product && product !== 'new' })
   useEffect(() => {
     if (product === 'new') setF(empty)
     else if (detail.data && product) {
       const d = detail.data
-      setF({ name: d.name, scientific_name: d.scientific_name ?? '', category: d.category.slug, short_description: d.short_description ?? '', description: d.description ?? '', price: d.price, compare_at_price: d.compare_at_price ?? '', stock: d.stock, low_stock_threshold: product.low_stock_threshold, image_url: d.image_url ?? '', light: d.light, difficulty: d.difficulty, water_every_days: d.water_every_days, fertilize_every_days: d.fertilize_every_days ?? '', pet_friendly: d.pet_friendly, air_purifying: d.air_purifying, edible: d.edible, tags: d.tags.join(', '), is_active: product.is_active, is_featured: d.is_featured })
+      setF({ name: d.name, scientific_name: d.scientific_name ?? '', category: d.category.slug, short_description: d.short_description ?? '', description: d.description ?? '', price: d.price, compare_at_price: d.compare_at_price ?? '', stock: d.stock, low_stock_threshold: product.low_stock_threshold, light: d.light, difficulty: d.difficulty, water_every_days: d.water_every_days, fertilize_every_days: d.fertilize_every_days ?? '', pet_friendly: d.pet_friendly, air_purifying: d.air_purifying, edible: d.edible, tags: d.tags.join(', '), is_active: product.is_active, is_featured: d.is_featured, images: [d.image_url, ...d.gallery].filter(Boolean) as string[] })
     }
   }, [product, detail.data])
   const save = useMutation({
     mutationFn: () => {
-      const body = { ...f, compare_at_price: f.compare_at_price === '' ? null : Number(f.compare_at_price), fertilize_every_days: f.fertilize_every_days === '' ? null : Number(f.fertilize_every_days), tags: f.tags.split(',').map((t) => t.trim()).filter(Boolean), image_url: f.image_url || null }
+      const { images, ...rest } = f
+      const body = { ...rest, compare_at_price: f.compare_at_price === '' ? null : Number(f.compare_at_price), fertilize_every_days: f.fertilize_every_days === '' ? null : Number(f.fertilize_every_days), tags: f.tags.split(',').map((t) => t.trim()).filter(Boolean), image_url: images[0] ?? null, gallery: images.slice(1) }
       return product === 'new' ? api.post('/admin/products', body) : api.patch(`/admin/products/${(product as AdminProduct).id}`, body)
     },
     onSuccess: () => {
@@ -162,19 +168,12 @@ function ProductDrawer({ product, onClose }: { product: AdminProduct | 'new' | n
     <Drawer open={!!product} onClose={onClose} title={product === 'new' ? 'New plant' : 'Edit plant'} className="max-w-2xl"
       footer={<Button size="lg" className="w-full" loading={save.isPending} onClick={() => save.mutate()}>Save plant</Button>}>
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="flex items-center gap-4 sm:col-span-2">
-          <PlantImage src={f.image_url || null} alt="" className="size-24 rounded-2xl" />
-          <Field label="Image" hint="Uploads to the product-images bucket" className="flex-1">
-            <Input type="file" accept="image/*" className="pt-2.5" onChange={async (e) => {
-              const file = e.target.files?.[0]
-              if (!file || !user) return
-              try { set('image_url', await uploadImage('product-images', file, user.id)) } catch (err) { errorToast(err) }
-            }} />
-          </Field>
+        <div className="sm:col-span-2">
+          <ProductImages images={f.images} onChange={(images) => set('images', images)} />
         </div>
         <Field label="Name"><Input value={f.name} onChange={(e) => set('name', e.target.value)} /></Field>
         <Field label="Scientific name"><Input value={f.scientific_name} onChange={(e) => set('scientific_name', e.target.value)} /></Field>
-        <Field label="Category"><Select value={f.category} onChange={(e) => set('category', e.target.value)}><option value="flowering">Flowering</option><option value="fruit-trees">Fruit trees</option><option value="vegetables">Kitchen garden</option><option value="herbs-greens">Herbs & greens</option></Select></Field>
+        <Field label="Category"><Select value={f.category} onChange={(e) => set('category', e.target.value)}>{(categories.data ?? [{ slug: f.category, name: f.category }]).map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}</Select></Field>
         <Field label="Tags" hint="Comma separated"><Input value={f.tags} onChange={(e) => set('tags', e.target.value)} /></Field>
         <Field label="Price (৳)"><Input type="number" value={f.price} onChange={(e) => set('price', Number(e.target.value))} /></Field>
         <Field label="Compare-at price" hint="Shows a sale badge"><Input type="number" value={f.compare_at_price} onChange={(e) => set('compare_at_price', e.target.value)} /></Field>

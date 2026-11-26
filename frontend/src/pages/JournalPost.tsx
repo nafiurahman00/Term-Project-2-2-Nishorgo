@@ -10,6 +10,7 @@ import { api, ApiError } from '@/lib/api'
 import type { JournalPost as Post } from '@/lib/types'
 import { date } from '@/lib/utils'
 import NotFound from './NotFound'
+import { mediaUrl } from '@/lib/media'
 
 export default function JournalPost() {
   const { slug = '' } = useParams()
@@ -34,7 +35,7 @@ export default function JournalPost() {
         </div>
       </Container>
       <Container className="mt-10 max-w-5xl">
-        <img src={p.cover_url ?? ''} alt="" className="aspect-[21/9] w-full rounded-2xl object-cover" />
+        <img src={mediaUrl(p.cover_url) ?? ''} alt="" className="aspect-[21/9] w-full rounded-2xl object-cover" />
       </Container>
       <Container className="mt-12 max-w-2xl">
         <div className="prose-leaf text-lg"><Markdown remarkPlugins={[remarkGfm]}>{p.body}</Markdown></div>
@@ -53,7 +54,7 @@ export default function JournalPost() {
           <div className="grid gap-6 md:grid-cols-3">
             {p.more.map((m) => (
               <Link key={m.slug} to={`/journal/${m.slug}`} className="group flex items-center gap-4 rounded-xl border border-line bg-surface p-3">
-                <img src={m.cover_url ?? ''} alt="" className="size-20 rounded-2xl object-cover" />
+                <img src={mediaUrl(m.cover_url) ?? ''} alt="" className="size-20 rounded-2xl object-cover" />
                 <div><div className="font-semibold group-hover:underline">{m.title}</div><div className="text-xs text-muted">{m.reading_minutes} min read</div></div>
               </Link>
             ))}

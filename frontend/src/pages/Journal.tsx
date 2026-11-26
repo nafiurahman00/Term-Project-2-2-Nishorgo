@@ -6,6 +6,7 @@ import { PageHeader, Skeleton } from '@/components/ui'
 import { api } from '@/lib/api'
 import type { JournalCard, Paged } from '@/lib/types'
 import { cn, date } from '@/lib/utils'
+import { mediaUrl } from '@/lib/media'
 
 export default function Journal() {
   const [params, setParams] = useSearchParams()
@@ -31,7 +32,7 @@ export default function Journal() {
       {list.isLoading && <Skeleton className="h-96 rounded-2xl" />}
       {lead && (
         <Link to={`/journal/${lead.slug}`} className="group mb-14 grid items-center gap-8 md:grid-cols-2">
-          <div className="overflow-hidden rounded-2xl"><img src={lead.cover_url ?? ''} alt="" className="aspect-[4/3] w-full object-cover transition duration-700 group-hover:scale-105" /></div>
+          <div className="overflow-hidden rounded-2xl"><img src={mediaUrl(lead.cover_url) ?? ''} alt="" className="aspect-[4/3] w-full object-cover transition duration-700 group-hover:scale-105" /></div>
           <div>
             <div className="text-sm text-muted">{date(lead.published_at)} · {lead.reading_minutes} min read</div>
             <h2 className="mt-2 text-3xl font-semibold group-hover:underline">{lead.title}</h2>
@@ -43,7 +44,7 @@ export default function Journal() {
         {rest.map((j, i) => (
           <motion.div key={j.slug} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.05 }}>
             <Link to={`/journal/${j.slug}`} className="group block">
-              <div className="overflow-hidden rounded-2xl"><img src={j.cover_url ?? ''} alt="" className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105" /></div>
+              <div className="overflow-hidden rounded-2xl"><img src={mediaUrl(j.cover_url) ?? ''} alt="" className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-105" /></div>
               <div className="mt-4 text-xs text-muted">{date(j.published_at)} · {j.reading_minutes} min read</div>
               <h3 className="mt-1 text-lg font-semibold group-hover:underline">{j.title}</h3>
               <p className="mt-1 line-clamp-2 text-muted">{j.excerpt}</p>

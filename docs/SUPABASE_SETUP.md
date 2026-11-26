@@ -48,8 +48,9 @@ Then authenticate:
 > using `apply_migration`, then run `supabase/seed.sql` with `execute_sql`, then
 > run the security and performance advisors."
 
-Optionally also run `supabase/seed_demo.sql` to get demo accounts and ~90 days
-of order history (**development only**).
+Then run `supabase/seed_catalog.sql` for the full 97-plant catalogue. Optionally
+also run `supabase/seed_demo.sql` and then `supabase/seed_demo_history.sql` to get
+demo accounts and six months of order history (**development only**).
 
 **Without MCP (Supabase CLI):**
 
@@ -58,7 +59,25 @@ npx supabase login
 npx supabase link --project-ref <your-project-ref>
 npx supabase db push            # applies supabase/migrations/*
 psql "$DB_URL" -f supabase/seed.sql
+psql "$DB_URL" -f supabase/seed_catalog.sql
 ```
+
+### Upload the catalogue photos
+
+Plant photos and journal covers are served from the `product-images` Storage
+bucket. The database stores paths such as `/plants/rose.webp`, and the app turns
+them into public Storage URLs. Upload the source files once per project:
+
+```bash
+SUPABASE_URL=https://<ref>.supabase.co SUPABASE_KEY=<publishable key> \
+STAFF_EMAIL=<an admin or staff email> STAFF_PASSWORD=<their password> \
+node supabase/scripts/upload-storage.mjs
+```
+
+The script signs in as that account; the bucket's RLS policy only lets staff
+write to it. Locally, `supabase db reset` or `npx supabase seed buckets --local`
+uploads the same folder automatically. Photos that admins add in the console
+go straight to the bucket under `catalog/`.
 
 ## 4. Dashboard settings (one-time)
 

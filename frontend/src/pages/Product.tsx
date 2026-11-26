@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'motion/react'
 import { BadgeCheck, Camera, ChevronRight, Eye, Heart, Minus, Plus, ShieldCheck, ThumbsUp, Truck } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { Link, useParams } from 'react-router'
@@ -23,6 +23,8 @@ export default function Product() {
   const p = product.data
   const { viewers, liveStock } = useProductLive(p?.id, slug)
   const [qty, setQty] = useState(1)
+  const [shown, setShown] = useState(0)
+  useEffect(() => { setShown(0) }, [slug])
   const add = useAddToCart()
   const wish = useToggleWishlist()
   const requireAuth = useRequireAuth()
@@ -52,8 +54,18 @@ export default function Product() {
         <div className="grid gap-12 lg:grid-cols-[1.1fr_1fr]">
           <div>
             <motion.div layoutId={`plant-${p.id}`}>
-              <PlantImage src={images[0] ?? null} alt={p.name} className="aspect-square rounded-2xl" imgClassName="p-10" />
+              <PlantImage src={images[Math.min(shown, images.length - 1)] ?? null} alt={p.name} className="aspect-square rounded-2xl" imgClassName="p-10" />
             </motion.div>
+            {images.length > 1 && (
+              <div className="mt-3 flex gap-2 overflow-x-auto">
+                {images.map((src, i) => (
+                  <button key={src} onClick={() => setShown(i)} aria-label={`Photo ${i + 1}`}
+                    className={cn('shrink-0 rounded-xl ring-2 ring-offset-2 ring-offset-bg transition', i === shown ? 'ring-primary' : 'ring-transparent hover:ring-line')}>
+                    <PlantImage src={src} alt="" className="size-16 rounded-xl sm:size-20" imgClassName="p-1" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="lg:pt-6">

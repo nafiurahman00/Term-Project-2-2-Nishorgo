@@ -2,10 +2,11 @@
 
 Plant photos added in the extended catalog (`supabase/seed_catalog.sql`) come from
 [Wikimedia Commons](https://commons.wikimedia.org). They're used under the licences below and were
-resized and converted to WebP for the web. The original 19 catalogue images and the journal
-covers were part of the 2022 project.
+resized and converted to WebP for the web. They're served from the `product-images` Supabase Storage
+bucket; the source files are in `supabase/storage/product-images/`. The original 19 catalogue images
+and the journal covers were part of the 2022 project.
 
-| File (`frontend/public/plants/`) | Plant | Author | Licence | Original |
+| Object (`product-images/plants/`) | Plant | Author | Licence | Original |
 |---|---|---|---|---|
 | `adenium.webp` | Adenium obesum | This Photo was taken by Timothy A. Gonsalves. Feel free to use my photos, but please mention me as the author. I would m | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0) | [source](https://commons.wikimedia.org/wiki/File:Adenium_Obesum_Flower_Side_Macro_Mar22_D72_23052-58_ZS_P.jpg) |
 | `aglaonema.webp` | Aglaonema | Kurt Stüber [1] | [CC BY-SA 3.0](http://creativecommons.org/licenses/by-sa/3.0/) | [source](https://commons.wikimedia.org/wiki/File:Aglaonema_commutatum2.jpg) |
