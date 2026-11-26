@@ -7,25 +7,24 @@ cron jobs. A thin **PHP (Laravel 12)** API calls that logic on behalf of each
 user. A **React 19** frontend provides the UI and uses Supabase Realtime for
 live features.
 
-> The original 2022 PHP/MySQL term project is available in this repository's git history (commit `efe519f` and earlier).
 
 ## Features
 
 | | |
 |---|---|
-| 🛍️ **Shop** | Full-text + fuzzy search (typo-tolerant: “lavendar” → Lavender), facets, filters, sort, infinite scroll, ⌘K command palette |
-| ✨ **Plant Match** | Quiz → a scoring function in Postgres ranks every plant for your light, schedule and pets, and says *why* |
-| 🛒 **Checkout** | Atomic `place_order()` locks rows, commits stock via a ledger, applies coupons + Leaf Points, holds stock for 30 min |
-| 💳 **Payments** | Stripe Checkout (test mode) + idempotent webhooks + automatic refunds; built-in demo mode without keys |
-| 📦 **Live orders** | State-machine trigger, timeline, realtime status page, payment countdown |
-| 🪴 **My Garden** | Delivered plants are added by trigger; watering/feeding schedule, health score, streaks, daily reminders (pg_cron) |
-| ⭐ **Reviews** | Verified-purchase badge computed in SQL, photo uploads (Storage), helpful votes, exact rating aggregates |
-| 💚 **Wishlist** | Price-drop and back-in-stock alerts fired by triggers |
-| ✨ **Leaf Points** | Append-only loyalty ledger, tiers (Seedling → Evergreen) with earn multipliers |
-| 💬 **Realtime** | Community chat rooms + expert support chat (postgres_changes), typing indicators (Broadcast), who's online & live product viewers (Presence), live purchase feed broadcast *from a database trigger*, live notifications |
-| 📊 **Admin console** | KPI dashboard (materialized view), revenue chart, category bars, order heatmap, inventory ledger + sparklines, order fulfilment, coupons, customers/roles, support inbox, audit log with field diffs |
-| 🔐 **Auth** | Supabase Auth: email/password, magic link, Google OAuth; custom access-token hook stamps `user_role` into JWTs |
-| 🎨 **UI** | “Modern botanical” design, dark mode with view transitions, Motion animations, fully responsive |
+| **Shop** | Full-text + fuzzy search (typo-tolerant: “lavendar” → Lavender), facets, filters, sort, infinite scroll, ⌘K command palette |
+| **Plant Match** | Quiz → a scoring function in Postgres ranks every plant for your light, schedule and pets, and says *why* |
+| **Checkout** | Atomic `place_order()` locks rows, commits stock via a ledger, applies coupons + Leaf Points, holds stock for 30 min |
+| **Payments** | Stripe Checkout (test mode) + idempotent webhooks + automatic refunds; built-in demo mode without keys |
+| **Live orders** | State-machine trigger, timeline, realtime status page, payment countdown |
+| **My Garden** | Delivered plants are added by trigger; watering/feeding schedule, health score, streaks, daily reminders (pg_cron) |
+| **Reviews** | Verified-purchase badge computed in SQL, photo uploads (Storage), helpful votes, exact rating aggregates |
+| **Wishlist** | Price-drop and back-in-stock alerts fired by triggers |
+| **Leaf Points** | Append-only loyalty ledger, tiers (Seedling → Evergreen) with earn multipliers |
+| **Realtime** | Community chat rooms + expert support chat (postgres_changes), typing indicators (Broadcast), who's online & live product viewers (Presence), live purchase feed broadcast *from a database trigger*, live notifications |
+| **Admin console** | KPI dashboard (materialized view), revenue chart, category bars, order heatmap, inventory ledger + sparklines, order fulfilment, coupons, customers/roles, support inbox, audit log with field diffs |
+| **Auth** | Supabase Auth: email/password, magic link, Google OAuth; custom access-token hook stamps `user_role` into JWTs |
+| **UI** | “Modern botanical” design, dark mode with view transitions, Motion animations, fully responsive |
 
 ## Architecture
 
