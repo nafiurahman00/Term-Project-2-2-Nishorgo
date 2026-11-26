@@ -1,0 +1,14 @@
+# Installed on Vercel from composer.json/composer.lock
+/vendor
+# Secrets live in Vercel's environment variables
+.env
+.env.*
+# Not needed at runtime
+/tests
+/storage/logs/*
+/storage/framework/cache/*
+/storage/framework/views/*
+/storage/framework/sessions/*
+/node_modules
+Dockerfile
+phpunit.xml

@@ -1,0 +1,18 @@
+# env
+.env
+.env.*
+!.env.example
+
+# deps / builds
+node_modules/
+frontend/dist/
+backend/vendor/
+
+# supabase local state
+supabase/.temp/
+supabase/.branches/
+
+# editors / os
+.DS_Store
+.idea/
+*.log

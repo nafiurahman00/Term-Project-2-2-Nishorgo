@@ -1,0 +1,120 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+   Nishorgo design tokens — calm, neutral surfaces with a deep green brand.
+--------------------------------------------------------------------------- */
+:root {
+  --bg: #fafaf8;
+  --surface: #ffffff;
+  --surface-2: #f3f3ef;
+  --fg: #1b1f1c;
+  --muted: #676e68;
+  --line: #e6e6e1;
+  --primary: #2d5b3a;
+  --primary-fg: #ffffff;
+  --accent: #e9f0e7;
+  --accent-fg: #24492f;
+  --clay: #b45a36;
+  --danger: #b42318;
+  --stage: #f4f3ef;
+  --ring: #2d5b3a;
+  /* Chart series (validated: L-band, chroma, ≥3:1 vs surface) */
+  --series-1: #3c8d5a;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #121412;
+  --surface: #1a1d1a;
+  --surface-2: #232723;
+  --fg: #ecefea;
+  --muted: #9aa39b;
+  --line: #2d322d;
+  --primary: #8cc097;
+  --primary-fg: #0f1a12;
+  --accent: #223026;
+  --accent-fg: #cfe3d2;
+  --clay: #e08a63;
+  --danger: #f97066;
+  --stage: #ecebe6;
+  --ring: #8cc097;
+  --series-1: #5fa236;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-clay: var(--clay);
+  --color-danger: var(--danger);
+  --color-stage: var(--stage);
+  --color-ring: var(--ring);
+  --color-series-1: var(--series-1);
+
+  --color-forest-50: #eef5ef;
+  --color-forest-100: #d9e9dc;
+  --color-forest-300: #8cc097;
+  --color-forest-500: #3c7d4c;
+  --color-forest-700: #2d5b3a;
+  --color-forest-900: #1b3523;
+  --color-forest-950: #0e1c12;
+  /* legacy alias: a soft green that reads well on dark surfaces */
+  --color-lime-glow: #8cc097;
+
+  --animate-shimmer: shimmer 1.6s linear infinite;
+}
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+  }
+  ::selection { background: var(--accent); color: var(--accent-fg); }
+  :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 6px; }
+  h1, h2, h3 { letter-spacing: -0.02em; text-wrap: balance; }
+  p { text-wrap: pretty; }
+  input[type='number']::-webkit-inner-spin-button { -webkit-appearance: none; }
+}
+
+@layer components {
+  .glass { @apply border border-line bg-surface; }
+  /* Product photos have white or transparent backgrounds: "multiply" blends
+     them into the neutral stage colour in both themes. */
+  .plant-stage { @apply relative overflow-hidden bg-stage; }
+  .plant-stage img { mix-blend-mode: multiply; }
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface-2) 0%, var(--line) 50%, var(--surface-2) 100%);
+    background-size: 200% 100%;
+    @apply animate-shimmer rounded-lg;
+  }
+  .prose-leaf { @apply leading-relaxed text-fg/90; }
+  .prose-leaf h2 { @apply mt-8 mb-3 text-2xl font-semibold; }
+  .prose-leaf h3 { @apply mt-6 mb-2 text-xl font-semibold; }
+  .prose-leaf p { @apply my-4; }
+  .prose-leaf ul { @apply my-4 list-disc space-y-1 pl-6; }
+  .prose-leaf ol { @apply my-4 list-decimal space-y-1 pl-6; }
+  .prose-leaf strong { @apply font-semibold text-fg; }
+  .prose-leaf em { @apply italic; }
+  .prose-leaf table { @apply my-6 w-full overflow-hidden rounded-lg border border-line text-sm; }
+  .prose-leaf th { @apply bg-surface-2 px-3 py-2 text-left font-semibold; }
+  .prose-leaf td { @apply border-t border-line px-3 py-2; }
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+}

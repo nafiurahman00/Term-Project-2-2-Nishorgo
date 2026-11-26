@@ -1,0 +1,155 @@
+-- =============================================================================
+-- Nishorgo 2.0 · Reference data: categories, catalog, coupons, journal.
+-- Safe to run on any environment (no users required). Idempotent by slug/code.
+-- Product image paths are served by the frontend from /public/plants.
+-- =============================================================================
+
+insert into public.categories (slug, name, tagline, emoji, sort_order) values
+  ('flowering',    'Flowering Plants', 'Colour for every balcony and windowsill', '🌸', 1),
+  ('fruit-trees',  'Fruit Trees',      'Dwarf, grafted and pot-friendly',         '🥭', 2),
+  ('vegetables',   'Kitchen Garden',   'Grow your own dinner',                     '🥕', 3),
+  ('herbs-greens', 'Herbs & Greens',   'Fragrant, fresh and fast-growing',         '🌿', 4)
+on conflict (slug) do nothing;
+
+-- Opening stock is moved into the inventory ledger automatically by a trigger.
+insert into public.products
+  (name, scientific_name, category_id, short_description, description, price, compare_at_price, stock,
+   low_stock_threshold, image_url, light, difficulty, water_every_days, fertilize_every_days,
+   pet_friendly, air_purifying, edible, mature_height_cm, tags, is_featured)
+select v.name, v.sci, c.id, v.short, v.descr, v.price, v.compare, v.stock, v.low, '/plants/' || v.img || '.webp',
+       v.light::public.light_level, v.diff::public.care_difficulty, v.water, v.feed,
+       v.pet, v.air, v.edible, v.height, v.tags, v.featured
+  from (values
+    ('Miniature Rose', 'Rosa chinensis', 'flowering',
+     'Clusters of crimson blooms on a compact, pot-ready bush.',
+     E'A patio rose bred for containers. Expect flushes of velvety red blooms from autumn through spring in Bangladesh''s mild season.\n\n**Care tips**\n- 5–6 hours of direct sun keeps it flowering\n- Water when the top 2 cm of soil is dry\n- Deadhead spent blooms to encourage new buds',
+     450, 550, 24, 5, 'rose', 'full_sun', 'moderate', 2, 14, true, false, false, 45,
+     array['flowers', 'red', 'gift', 'fragrant'], true),
+    ('Daffodil', 'Narcissus pseudonarcissus', 'flowering',
+     'Cheerful golden trumpets that announce the end of winter.',
+     E'Grown from premium bulbs and shipped just before blooming. Perfect for a sunny windowsill.\n\n**Good to know:** all parts are toxic to cats and dogs — keep out of reach of curious pets.',
+     380, null, 15, 4, 'daffodil', 'full_sun', 'easy', 3, 30, false, false, false, 40,
+     array['flowers', 'yellow', 'bulb', 'winter'], false),
+    ('African Marigold', 'Tagetes erecta', 'flowering',
+     'Pom-pom blooms in saffron and gold — a festival favourite.',
+     E'Marigolds are tough, sun-loving and naturally deter pests, which makes them a great companion for vegetables.\n\n**Companion planting:** grow next to tomatoes to keep whiteflies away.',
+     180, 220, 40, 8, 'marigold', 'full_sun', 'easy', 2, 21, false, false, false, 60,
+     array['flowers', 'orange', 'yellow', 'pest-repellent', 'festival'], true),
+    ('Hydrangea', 'Hydrangea macrophylla', 'flowering',
+     'Huge snowball flower heads that shift colour with soil pH.',
+     E'Acidic soil turns blooms blue; alkaline soil turns them pink. Loves morning sun and afternoon shade.\n\n**Thirsty plant:** keep the soil evenly moist, especially in summer.',
+     850, 990, 12, 3, 'hydrangea', 'bright_indirect', 'moderate', 1, 21, false, false, false, 90,
+     array['flowers', 'blue', 'pink', 'statement'], true),
+    ('Moth Orchid', 'Phalaenopsis amabilis', 'flowering',
+     'Elegant arching sprays of blooms that last for months.',
+     E'The easiest orchid for beginners. Blooms last 2–3 months and it re-blooms yearly.\n\n**The ice-cube myth:** skip it. Water thoroughly once a week and let the bark drain.',
+     1200, null, 18, 4, 'orchids', 'bright_indirect', 'moderate', 7, 14, true, true, false, 50,
+     array['flowers', 'white', 'indoor', 'gift', 'luxury'], true),
+    ('Dahlia', 'Dahlia pinnata', 'flowering',
+     'Geometric, dinner-plate blooms in vivid sunset tones.',
+     E'Dahlias reward you with blooms from late autumn to spring. Stake taller stems and pinch the tips for a bushier plant.',
+     420, null, 20, 5, 'dahlia', 'full_sun', 'moderate', 2, 14, false, false, false, 100,
+     array['flowers', 'orange', 'statement'], false),
+    ('Lilac', 'Syringa vulgaris', 'flowering',
+     'Heady, nostalgic fragrance in clusters of soft purple.',
+     E'Prized for its perfume. Needs a cool spell to flower well, so it does best on rooftops and in the north of the country.',
+     690, null, 9, 3, 'lilac', 'full_sun', 'expert', 3, 30, true, false, false, 150,
+     array['flowers', 'purple', 'fragrant'], false),
+    ('Common Daisy', 'Bellis perennis', 'flowering',
+     'A carpet of tiny white-and-gold blooms. Pure joy.',
+     E'Low-growing and forgiving — ideal for window boxes and the edges of planters.',
+     160, null, 35, 8, 'daisy', 'full_sun', 'easy', 2, 30, false, false, false, 15,
+     array['flowers', 'white', 'compact', 'beginner'], false),
+    ('English Lavender', 'Lavandula angustifolia', 'herbs-greens',
+     'Silver foliage, purple spikes and a calming scent.',
+     E'Brush past it to release the fragrance. Hates wet feet — use a gritty mix and a pot with drainage holes.\n\n**Harvest:** cut stems as the first buds open for drying.',
+     520, 600, 14, 4, 'lavender', 'full_sun', 'moderate', 6, 60, false, true, false, 50,
+     array['herb', 'purple', 'fragrant', 'calming', 'drought-tolerant'], true),
+    ('Butterhead Lettuce', 'Lactuca sativa', 'herbs-greens',
+     'Grow crisp salad leaves on your balcony in 45 days.',
+     E'Pick the outer leaves and it keeps producing. Best in the cooler months; give afternoon shade when it''s hot.',
+     120, null, 50, 10, 'lettuce', 'medium', 'easy', 1, 14, true, false, true, 25,
+     array['edible', 'salad', 'fast-growing', 'beginner', 'compact'], false),
+    ('Spring Onion', 'Allium fistulosum', 'herbs-greens',
+     'Endless green onions — snip, and they grow back.',
+     E'One of the easiest edibles you can grow. Snip the greens 3 cm above the soil and they regrow within a week.',
+     90, null, 60, 10, 'onions', 'full_sun', 'easy', 2, 30, false, false, true, 30,
+     array['edible', 'kitchen', 'regrows', 'beginner', 'compact'], false),
+    ('Sweet Capsicum', 'Capsicum annuum', 'vegetables',
+     'Glossy bell peppers that ripen from green to red.',
+     E'A productive container plant. Each plant yields 6–10 peppers per season with regular feeding.',
+     220, null, 28, 6, 'capsicum', 'full_sun', 'moderate', 2, 14, true, false, true, 60,
+     array['edible', 'vegetable', 'red', 'high-yield'], false),
+    ('Nantes Carrot', 'Daucus carota', 'vegetables',
+     'Sweet, crunchy carrots grown in a deep pot.',
+     E'Sold as a healthy seedling tray. Use a pot at least 30 cm deep with loose, stone-free soil.',
+     150, null, 30, 6, 'carrot', 'full_sun', 'easy', 2, 30, true, false, true, 30,
+     array['edible', 'vegetable', 'root', 'kids'], false),
+    ('Seed Potato', 'Solanum tuberosum', 'vegetables',
+     'Grow a bag of potatoes from one sprouted tuber.',
+     E'Plant in a grow bag and keep "earthing up" the stems as they grow — every buried node makes more potatoes.\n\n**Note:** leaves and green tubers are toxic to pets.',
+     110, null, 4, 5, 'potato', 'full_sun', 'easy', 3, 21, false, false, true, 60,
+     array['edible', 'vegetable', 'grow-bag'], false),
+    ('Cherry Tomato', 'Solanum lycopersicum', 'vegetables',
+     'Sweet, bite-sized tomatoes by the hundred.',
+     E'The most rewarding plant in the kitchen garden. Pinch out side shoots, stake well, and feed every two weeks once flowers appear.',
+     240, 290, 45, 8, 'tomato', 'full_sun', 'easy', 1, 14, false, false, true, 120,
+     array['edible', 'vegetable', 'red', 'high-yield', 'beginner'], true),
+    ('Dwarf Mango (Amrapali)', 'Mangifera indica', 'fruit-trees',
+     'A grafted Amrapali mango that fruits in a large pot.',
+     E'Amrapali is a dwarf, regular-bearing variety that fruits in 2–3 years in a 20-inch tub. Sweet, fibreless and very Bangladeshi.',
+     1450, 1650, 10, 3, 'mango', 'full_sun', 'moderate', 3, 60, true, false, true, 250,
+     array['edible', 'fruit', 'tree', 'grafted', 'national-favourite'], true),
+    ('Jackfruit Sapling', 'Artocarpus heterophyllus', 'fruit-trees',
+     'The national fruit of Bangladesh — start your own tree.',
+     E'A vigorous sapling for gardens and rooftops. Plant in the ground or a very large drum for best results.',
+     650, null, 7, 3, 'jackfruit', 'full_sun', 'moderate', 3, 60, true, true, true, 600,
+     array['edible', 'fruit', 'tree', 'national-fruit'], false),
+    ('Pineapple Plant', 'Ananas comosus', 'fruit-trees',
+     'Architectural leaves and a real pineapple in 18 months.',
+     E'Surprisingly easy and drought-tolerant. Water into the central rosette and let the soil dry between waterings.',
+     480, null, 16, 4, 'pineapple', 'full_sun', 'easy', 7, 60, true, true, true, 90,
+     array['edible', 'fruit', 'drought-tolerant', 'tropical'], false),
+    ('Dwarf Orange', 'Citrus sinensis', 'fruit-trees',
+     'Fragrant blossoms and juicy oranges on a balcony tree.',
+     E'Citrus loves sun and hates soggy roots. Feed with a citrus fertiliser monthly during the growing season.\n\n**Note:** citrus is toxic to cats and dogs.',
+     1100, null, 8, 3, 'orange', 'full_sun', 'moderate', 3, 30, false, false, true, 180,
+     array['edible', 'fruit', 'tree', 'fragrant'], false)
+  ) as v(name, sci, cat, short, descr, price, compare, stock, low, img, light, diff, water, feed,
+         pet, air, edible, height, tags, featured)
+  join public.categories c on c.slug = v.cat
+ where not exists (select 1 from public.products p where p.name = v.name);
+
+insert into public.coupons (code, description, kind, value, min_subtotal, max_discount, ends_at, usage_limit, per_user_limit) values
+  ('WELCOME10', '10% off your first order',       'percent', 10,  500,  300,  null, null, 1),
+  ('GREEN100',  '৳100 off orders over ৳1,000',    'fixed',   100, 1000, null, null, 500,  2),
+  ('MONSOON25', 'Monsoon sale — 25% off (max ৳400)', 'percent', 25, 800, 400, now() + interval '60 days', 200, 1)
+on conflict (code) do nothing;
+
+insert into public.journal_posts (title, excerpt, body, cover_url, tags, product_ids, published_at)
+select v.title, v.excerpt, v.body, v.cover, v.tags,
+       array(select id from public.products where name = any (v.products)), now() - v.age
+  from (values
+    ('Your first balcony kitchen garden',
+     'Five edibles that thrive in Dhaka''s heat, need little space, and forgive beginner mistakes.',
+     E'Growing food on a balcony is one of the most satisfying things you can do with a few square feet of concrete.\n\n## Start with these five\n\n1. **Cherry tomatoes** — productive, forgiving and delicious.\n2. **Spring onions** — snip and they regrow within a week.\n3. **Lettuce** — harvest outer leaves for months.\n4. **Capsicum** — a handful of plants keeps a family in peppers.\n5. **Marigolds** — not edible, but they keep pests off everything else.\n\n## Soil matters more than anything\n\nMix one part garden soil, one part cocopeat and one part compost. Add a handful of perlite or brick chips for drainage.\n\n## Water in the morning\n\nEvening watering leaves leaves wet overnight, which invites fungus. In peak summer, check pots twice a day.',
+     '/journal/basket.jpg', array['kitchen-garden', 'beginner', 'balcony'],
+     array['Cherry Tomato', 'Spring Onion', 'Butterhead Lettuce', 'Sweet Capsicum', 'African Marigold'], interval '3 days'),
+    ('The potato: a humble root with a wild history',
+     'From the Andes to every Bangladeshi kitchen — and how to grow a bag of them on your roof.',
+     E'*Solanum tuberosum* is a perennial in the nightshade family, first domesticated in the Andes more than 7,000 years ago.\n\n## Grow potatoes in a bag\n\n- Fill a grow bag one-third with soil and plant a sprouted tuber.\n- As stems grow, keep adding soil so only the top leaves show. This is called *earthing up*.\n- Harvest 90–110 days later when the foliage yellows.\n\nOne seed potato can produce 2–3 kg of new potatoes.',
+     '/journal/harvest.jpg', array['vegetables', 'history', 'grow-bags'], array['Seed Potato'], interval '9 days'),
+    ('Amrapali: the mango that fits on your rooftop',
+     'Why this dwarf variety is the best fruit tree for city growers.',
+     E'The mango (*Mangifera indica*) is believed to have originated in the region between north-western Myanmar, Bangladesh and north-eastern India.\n\n## Why Amrapali?\n\nAmrapali is a cross of Dashehari and Neelum. It stays small, fruits every year (many mangoes alternate) and the fruit is sweet and fibreless.\n\n## Pot setup\n\nUse a 20–24 inch drum with plenty of drainage holes. Feed with well-rotted cow dung and bone meal before the flowering season.',
+     '/journal/greens.jpg', array['fruit-trees', 'rooftop'], array['Dwarf Mango (Amrapali)', 'Jackfruit Sapling'], interval '16 days'),
+    ('Roses that actually bloom: a no-nonsense guide',
+     'Sun, food and deadheading. That''s 90% of it.',
+     E'There are over three hundred species of rose and tens of thousands of cultivars. Miniature roses are bred for pots — and they''re less fussy than their reputation.\n\n## The three rules\n\n1. **Sun:** at least 5 hours of direct light.\n2. **Food:** a balanced fertiliser every two weeks while blooming.\n3. **Deadhead:** snip spent flowers just above a five-leaf set.\n\n## Pests\n\nAphids love new growth. A blast of water or a neem oil spray at dusk usually sorts them out.',
+     '/journal/sprout.jpg', array['flowers', 'care-guide'], array['Miniature Rose', 'African Marigold'], interval '24 days'),
+    ('Watering is a skill — here''s how to learn it',
+     'Most houseplants die from too much love. Use the finger test and read your plant.',
+     E'Overwatering kills more plants than anything else. Roots need air as much as water.\n\n## The finger test\n\nPush a finger 2–3 cm into the soil. Dry? Water thoroughly until it drains. Damp? Wait.\n\n## Signs of trouble\n\n| Symptom | Likely cause |\n|---|---|\n| Yellow, soft lower leaves | Too much water |\n| Crispy brown edges | Too little water or low humidity |\n| Wilting with wet soil | Root rot — act fast |\n\n**Tip:** Nishorgo''s *My Garden* sends you a reminder when each plant is due, based on its species.',
+     '/journal/tomatoes.jpg', array['care-guide', 'beginner'], array['Moth Orchid', 'English Lavender', 'Pineapple Plant'], interval '31 days')
+  ) as v(title, excerpt, body, cover, tags, products, age)
+ where not exists (select 1 from public.journal_posts j where j.title = v.title);

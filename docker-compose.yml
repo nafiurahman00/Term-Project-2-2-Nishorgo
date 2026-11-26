@@ -1,0 +1,15 @@
+# Runs the PHP API in Docker (no local PHP needed).
+#   docker compose up --build api
+# Supabase itself runs via `npx supabase start` (local) or is hosted.
+services:
+  api:
+    build: ./backend
+    env_file: ./backend/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    # Reach a local Supabase stack running on the host.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
