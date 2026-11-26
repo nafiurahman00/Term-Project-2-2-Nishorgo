@@ -22,7 +22,7 @@ export default function Community() {
                 <h1 className="text-2xl font-semibold md:text-3xl">Community</h1>
         <p className="mt-2 max-w-2xl text-muted">Chat with other plant owners and our team. Share photos, ask questions and swap tips.</p>
       </div>
-      <div className="grid h-[calc(100dvh-16rem)] min-h-[520px] overflow-hidden rounded-2xl border border-line bg-surface md:grid-cols-[280px_1fr]">
+      <div className="grid h-[calc(100dvh-16rem)] min-h-[520px] grid-cols-[minmax(0,1fr)] overflow-hidden rounded-2xl border border-line bg-surface md:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="hidden flex-col border-r border-line md:flex">
           <div className="border-b border-line px-5 py-4 text-sm font-semibold text-fg">Rooms</div>
           <div className="flex-1 space-y-1 overflow-y-auto p-2">
@@ -42,11 +42,11 @@ export default function Community() {
             ))}
           </div>
         </aside>
-        <section className="flex min-h-0 flex-col">
+        <section className="flex min-h-0 min-w-0 flex-col">
           {active && (
             <>
-              <div className="flex items-center gap-3 border-b border-line px-5 py-3">
-                <div className="flex gap-2 overflow-x-auto md:hidden">
+              <div className="flex items-center gap-3 border-b border-line px-3 py-3 sm:px-5">
+                <div className="-mx-1 flex min-w-0 flex-1 gap-2 overflow-x-auto px-1 md:hidden">
                   {list.map((r) => (
                     <button key={r.id} onClick={() => navigate(`/community/${r.slug}`)} className={cn('shrink-0 rounded-full px-3 py-1 text-sm', active.id === r.id ? 'bg-primary text-primary-fg' : 'bg-surface-2')}>{r.title}</button>
                   ))}

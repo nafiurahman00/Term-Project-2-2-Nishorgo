@@ -22,6 +22,10 @@ const CATEGORY_IMAGE: Record<string, string> = {
   'fruit-trees': '/plants/mango.webp',
   vegetables: '/plants/tomato.webp',
   'herbs-greens': '/plants/lavender.webp',
+  'indoor-plants': '/plants/monstera.webp',
+  'succulents-cacti': '/plants/echeveria.webp',
+  'climbers-hanging': '/plants/bougainvillea.webp',
+  bonsai: '/plants/ficus-bonsai.webp',
 }
 
 const HERO = [

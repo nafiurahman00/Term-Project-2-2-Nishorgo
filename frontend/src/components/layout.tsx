@@ -29,6 +29,16 @@ const NAV = [
   { to: '/journal', label: 'Journal' },
 ]
 
+function accountLinks(isStaff: boolean) {
+  return [
+    { to: '/account', icon: User, label: 'Account & rewards' },
+    { to: '/orders', icon: Package, label: 'Orders' },
+    { to: '/wishlist', icon: Heart, label: 'Wishlist' },
+    { to: '/garden', icon: Sprout, label: 'My Garden' },
+    ...(isStaff ? [{ to: '/admin', icon: LayoutDashboard, label: 'Admin console' }] : []),
+  ]
+}
+
 function UserMenu() {
   const { account, isStaff, signOut } = useAuth()
   const [open, setOpen] = useState(false)
@@ -36,7 +46,8 @@ function UserMenu() {
   useEffect(() => { setOpen(false) }, [pathname])
   if (!account) return null
   return (
-    <div className="relative">
+    // On phones the account links live in the menu panel instead (see Navbar).
+    <div className="relative hidden md:block">
       <button onClick={() => setOpen((v) => !v)} className="ml-1 rounded-full" aria-label="Account menu">
         <Avatar src={account.avatar_url} name={account.full_name} className="size-8" />
       </button>
@@ -50,13 +61,7 @@ function UserMenu() {
                 <div className="text-sm font-semibold">{account.full_name}</div>
                 <div className="text-xs text-muted">{account.tier} member · {account.loyalty_points.toLocaleString()} Leaf Points</div>
               </div>
-              {[
-                { to: '/account', icon: User, label: 'Account & rewards' },
-                { to: '/orders', icon: Package, label: 'Orders' },
-                { to: '/wishlist', icon: Heart, label: 'Wishlist' },
-                { to: '/garden', icon: Sprout, label: 'My Garden' },
-                ...(isStaff ? [{ to: '/admin', icon: LayoutDashboard, label: 'Admin console' }] : []),
-              ].map((i) => (
+              {accountLinks(isStaff).map((i) => (
                 <Link key={i.to} to={i.to} className="flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-surface-2">
                   <i.icon className="size-4 text-muted" /> {i.label}
                 </Link>
@@ -73,32 +78,33 @@ function UserMenu() {
 }
 
 function Navbar({ onCart, onSearch }: { onCart: () => void; onSearch: () => void }) {
-  const { session } = useAuth()
+  const { session, account, isStaff, signOut } = useAuth()
   const { theme, toggle } = useTheme()
   const cart = useCart()
   const [mobile, setMobile] = useState(false)
   const { pathname } = useLocation()
   useEffect(() => { setMobile(false) }, [pathname])
   const count = cart.data?.item_count ?? 0
-  const iconBtn = 'relative grid size-9 place-items-center rounded-lg text-muted hover:bg-surface-2 hover:text-fg'
+  const iconBtn = 'relative grid size-9 shrink-0 place-items-center rounded-lg text-muted hover:bg-surface-2 hover:text-fg'
+  const mobileLink = 'flex items-center gap-3 rounded-md px-2 py-2.5 text-sm'
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-5 md:px-6">
-        <Logo />
-        <nav className="hidden items-center gap-6 md:flex">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-5 md:gap-6 md:px-6">
+        <Logo className="shrink-0" />
+        <nav className="hidden items-center gap-6 lg:flex">
           {NAV.map((n) => (
-            <NavLink key={n.to} to={n.to} className={({ isActive }) => cn('text-sm transition-colors', isActive ? 'font-medium text-fg' : 'text-muted hover:text-fg')}>
+            <NavLink key={n.to} to={n.to} className={({ isActive }) => cn('text-sm whitespace-nowrap transition-colors', isActive ? 'font-medium text-fg' : 'text-muted hover:text-fg')}>
               {n.label}
             </NavLink>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex min-w-0 items-center gap-0.5 sm:gap-1">
           <button onClick={onSearch} className="mr-1 hidden h-9 w-56 items-center gap-2 rounded-lg border border-line bg-bg px-3 text-sm text-muted transition hover:border-fg/20 lg:flex">
             <Search className="size-4" /> Search plants <kbd className="ml-auto text-[11px] text-muted/80">⌘K</kbd>
           </button>
           <button onClick={onSearch} className={cn(iconBtn, 'lg:hidden')} aria-label="Search"><Search className="size-[18px]" /></button>
-          <button onClick={toggle} className={iconBtn} aria-label="Toggle theme">
+          <button onClick={toggle} className={cn(iconBtn, 'hidden md:grid')} aria-label="Toggle theme">
             {theme === 'dark' ? <Sun className="size-[18px]" /> : <Moon className="size-[18px]" />}
           </button>
           {session && <NotificationBell />}
@@ -109,17 +115,44 @@ function Navbar({ onCart, onSearch }: { onCart: () => void; onSearch: () => void
             )}
           </button>
           {session ? <UserMenu /> : (
-            <Link to="/login" className="ml-2"><Button size="sm">Sign in</Button></Link>
+            <Link to="/login" className="ml-1 shrink-0 sm:ml-2"><Button size="sm">Sign in</Button></Link>
           )}
-          <button onClick={() => setMobile((v) => !v)} className={cn(iconBtn, 'md:hidden')} aria-label="Menu">
+          <button onClick={() => setMobile((v) => !v)} className={cn(iconBtn, 'lg:hidden')} aria-label="Menu" aria-expanded={mobile}>
             {mobile ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
         </div>
       </div>
       {mobile && (
-        <nav className="border-t border-line px-5 py-2 md:hidden">
-          {NAV.map((n) => <NavLink key={n.to} to={n.to} className="block py-2.5 text-sm">{n.label}</NavLink>)}
-        </nav>
+        <div className="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-line px-4 pt-2 pb-4 lg:hidden">
+          <nav>
+            {NAV.map((n) => (
+              <NavLink key={n.to} to={n.to} className={({ isActive }) => cn(mobileLink, isActive ? 'font-medium text-fg' : 'text-fg/80')}>{n.label}</NavLink>
+            ))}
+          </nav>
+          {account && (
+            <div className="mt-2 border-t border-line pt-3 md:hidden">
+              <div className="flex items-center gap-3 px-2 pb-2">
+                <Avatar src={account.avatar_url} name={account.full_name} className="size-8" />
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-semibold">{account.full_name}</div>
+                  <div className="truncate text-xs text-muted">{account.tier} member · {account.loyalty_points.toLocaleString()} Leaf Points</div>
+                </div>
+              </div>
+              {accountLinks(isStaff).filter((i) => !NAV.some((n) => n.to === i.to)).map((i) => (
+                <Link key={i.to} to={i.to} className={mobileLink}><i.icon className="size-4 text-muted" /> {i.label}</Link>
+              ))}
+            </div>
+          )}
+          <div className="mt-2 border-t border-line pt-2 md:hidden">
+            <button onClick={toggle} className={cn(mobileLink, 'w-full')}>
+              {theme === 'dark' ? <Sun className="size-4 text-muted" /> : <Moon className="size-4 text-muted" />}
+              {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+            </button>
+            {account && (
+              <button onClick={signOut} className={cn(mobileLink, 'w-full text-danger')}><LogOut className="size-4" /> Sign out</button>
+            )}
+          </div>
+        </div>
       )}
     </header>
   )
@@ -128,7 +161,7 @@ function Navbar({ onCart, onSearch }: { onCart: () => void; onSearch: () => void
 function AnnouncementBar() {
   return (
     <div className="bg-primary px-4 py-2 text-center text-xs text-primary-fg">
-      Free delivery on orders over ৳1,500 · 30-day healthy plant guarantee
+      Free delivery on orders over ৳1,500<span className="hidden sm:inline"> · 30-day healthy plant guarantee</span>
     </div>
   )
 }
@@ -158,7 +191,12 @@ function Footer() {
       <div className="border-t border-line">
         <div className="mx-auto flex max-w-7xl flex-wrap justify-between gap-2 px-5 py-5 text-xs text-muted md:px-6">
           <span>© {new Date().getFullYear()} Nishorgo. Dhaka, Bangladesh.</span>
-          <span>Secure card payments by Stripe</span>
+          <span className="flex flex-wrap gap-x-4 gap-y-1">
+            <span>Secure card payments by Stripe</span>
+            <a href="https://github.com/nafiurahman00/Term-Project-2-2-Nishorgo/blob/main/docs/IMAGE_CREDITS.md" target="_blank" rel="noreferrer" className="underline-offset-2 hover:text-fg hover:underline">
+              Photo credits
+            </a>
+          </span>
         </div>
       </div>
     </footer>

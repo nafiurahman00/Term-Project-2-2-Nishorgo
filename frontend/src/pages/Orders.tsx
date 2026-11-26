@@ -8,7 +8,7 @@ import { Badge, Button, EmptyState, PageHeader, Skeleton } from '@/components/ui
 import { api } from '@/lib/api'
 import { keys } from '@/lib/queries'
 import type { OrderSummary } from '@/lib/types'
-import { date, money, STATUS_META } from '@/lib/utils'
+import { cn, date, money, STATUS_META } from '@/lib/utils'
 
 export default function Orders() {
   const orders = useQuery({ queryKey: keys.orders, queryFn: () => api.get<OrderSummary[]>('/orders') })
@@ -20,17 +20,25 @@ export default function Orders() {
       <div className="space-y-3">
         {orders.data?.map((o, i) => (
           <motion.div key={o.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
-            <Link to={`/orders/${o.id}`} className="flex items-center gap-4 rounded-xl border border-line bg-surface p-4 transition hover:shadow-lg">
-              <div className="flex -space-x-4">
-                {o.thumbnails.slice(0, 3).map((t, j) => <PlantImage key={j} src={t} alt="" className="size-14 rounded-2xl border-2 border-surface" imgClassName="p-1" />)}
+            <Link to={`/orders/${o.id}`} className="flex items-center gap-3 rounded-xl border border-line bg-surface p-3 transition hover:shadow-lg sm:gap-4 sm:p-4">
+              <div className="flex shrink-0 sm:-space-x-4">
+                {o.thumbnails.slice(0, 3).map((t, j) => (
+                  <PlantImage key={j} src={t} alt="" className={cn('size-12 rounded-xl border-2 border-surface sm:size-14 sm:rounded-2xl', j > 0 && 'hidden sm:block')} imgClassName="p-1" />
+                ))}
               </div>
               <div className="min-w-0 flex-1">
-                <div className="font-semibold">{o.order_number}</div>
-                <div className="text-sm text-muted">{date(o.placed_at)} · {o.item_count} item{o.item_count > 1 ? 's' : ''}</div>
+                <div className="truncate font-semibold whitespace-nowrap">{o.order_number}</div>
+                <div className="truncate text-sm text-muted">
+                  {date(o.placed_at)} · {o.item_count} item{o.item_count > 1 ? 's' : ''}
+                </div>
+                <div className="mt-1.5 flex items-center gap-2 sm:hidden">
+                  <Badge className={STATUS_META[o.status].tone}>{STATUS_META[o.status].label}</Badge>
+                  <span className="text-sm font-semibold">{money(o.total)}</span>
+                </div>
               </div>
-              <Badge className={STATUS_META[o.status].tone}>{STATUS_META[o.status].label}</Badge>
+              <Badge className={cn('hidden sm:inline-flex', STATUS_META[o.status].tone)}>{STATUS_META[o.status].label}</Badge>
               <div className="hidden w-24 text-right font-semibold sm:block">{money(o.total)}</div>
-              <ChevronRight className="size-5 text-muted" />
+              <ChevronRight className="size-5 shrink-0 text-muted" />
             </Link>
           </motion.div>
         ))}

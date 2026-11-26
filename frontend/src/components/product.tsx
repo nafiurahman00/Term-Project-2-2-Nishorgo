@@ -57,15 +57,16 @@ export function ProductCard({ p, showReason }: { p: Product; index?: number; sho
         <button
           aria-label="Save to wishlist"
           onClick={() => requireAuth() && wish.mutate(p.id)}
-          className="absolute top-3 right-3 grid size-8 place-items-center rounded-full bg-surface text-muted opacity-0 shadow-sm transition group-hover:opacity-100 hover:text-clay focus:opacity-100"
+          className="absolute top-2.5 right-2.5 grid size-8 place-items-center rounded-full bg-surface text-muted shadow-sm transition hover:text-clay focus:opacity-100 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 sm:top-3 sm:right-3"
         >
           <Heart className="size-4" />
         </button>
       </div>
 
       <div className="mt-3 flex flex-1 flex-col">
-        <div className="flex items-start justify-between gap-3">
-          <Link to={`/plants/${p.slug}`} className="min-w-0 font-medium hover:underline">{p.name}</Link>
+        {/* Stacked on narrow cards so long names aren't squeezed beside the price. */}
+        <div className="flex flex-col gap-0.5 lg:flex-row lg:items-start lg:justify-between lg:gap-3">
+          <Link to={`/plants/${p.slug}`} className="line-clamp-2 min-w-0 font-medium hover:underline">{p.name}</Link>
           <Price price={p.price} compare={p.compare_at_price} className="shrink-0 text-sm" />
         </div>
         <div className="mt-0.5 truncate text-sm text-muted">{p.scientific_name ?? p.category.name}</div>

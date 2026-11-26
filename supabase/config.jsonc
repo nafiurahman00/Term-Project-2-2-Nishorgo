@@ -79,7 +79,9 @@
       "enabled": true,
       // Specifies an ordered list of seed files to load during db reset.
       // Supports glob patterns relative to supabase directory: "./seeds/*.sql"
-      "sql_paths": ["./seed.sql", "./seed_demo.sql"]
+      // seed_catalog runs after seed_demo so the first demo batch can't restock
+      // plants that the extended catalog lists as sold out.
+      "sql_paths": ["./seed.sql", "./seed_demo.sql", "./seed_catalog.sql", "./seed_demo_history.sql"]
     },
 
     "network_restrictions": {

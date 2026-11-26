@@ -117,7 +117,7 @@ export default function Shop() {
       <div className="mb-8 flex flex-wrap items-center gap-3">
         <div className="relative min-w-64 flex-1">
           <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name, colour, or need — “purple flower”, “edible”…"
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search plants, e.g. “purple flower”"
             className="h-12 w-full rounded-full border border-line bg-surface pr-4 pl-12 focus:border-ring focus:ring-4 focus:ring-ring/15 focus:outline-none" />
         </div>
         <Select value={sort} onChange={(e) => update((p) => p.set('sort', e.target.value))} className="h-12 w-auto rounded-full">

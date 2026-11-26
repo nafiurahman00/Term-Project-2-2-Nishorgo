@@ -112,9 +112,20 @@ cd frontend && cp .env.example .env    # paste the publishable/anon key
 npm install && npm run dev             # http://localhost:5173
 ```
 
-Demo accounts (from `seed_demo.sql`, password `Nishorgo#2026`):
-`admin@nishorgo.test`, `expert@nishorgo.test` (staff), `ayesha@nishorgo.test` (customer).
-Coupons: `WELCOME10`, `GREEN100`, `MONSOON25`.
+Seed data, loaded in this order by `supabase db reset`:
+
+| File | What it adds |
+|---|---|
+| `seed.sql` | 4 core categories, 19 plants, coupons, 5 journal posts |
+| `seed_demo.sql` | Admin, plant-expert and 8 customer accounts, 150 orders, reviews, chat |
+| `seed_catalog.sql` | 4 more categories, 78 more plants (97 total) with care data, 14 more journal posts |
+| `seed_demo_history.sql` | 32 more customers and ~420 orders spread over six months, reviews, wishlists, care logs |
+
+The demo files create sample users and orders, so don't run them in production.
+
+Demo accounts (password `Nishorgo#2026`): `admin@nishorgo.test`, `expert@nishorgo.test` (staff),
+`ayesha@nishorgo.test` (customer), plus customers such as `nadia.rahman@nishorgo.test`.
+Coupons: `WELCOME10`, `GREEN100`, `MONSOON25`. Plant photo credits: [docs/IMAGE_CREDITS.md](docs/IMAGE_CREDITS.md).
 
 Hosted Supabase, the MCP connector and Stripe: see [docs/SUPABASE_SETUP.md](docs/SUPABASE_SETUP.md).
 Deploying the storefront and API to Vercel: see [docs/DEPLOY_VERCEL.md](docs/DEPLOY_VERCEL.md).
@@ -129,7 +140,7 @@ Deploying the storefront and API to Vercel: see [docs/DEPLOY_VERCEL.md](docs/DEP
 ## Project layout
 
 ```
-supabase/   migrations, seed.sql, seed_demo.sql, tests, config.jsonc
+supabase/   migrations, seed*.sql, tests, config.jsonc
 backend/    Laravel API (app/Support/Db/Pg.php is the impersonating DB gateway)
 frontend/   React app (src/pages, src/components, src/hooks/useRealtime.ts)
 docs/       setup guides (Supabase, Vercel deployment)

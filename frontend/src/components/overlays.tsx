@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import { ArrowRight, Award, Bell, Command, Droplet, MessageCircle, Minus, Package, Plus, Search, Sprout, Star, Tag, Trash2, Truck, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useLocation, useNavigate } from 'react-router'
 import { useDeferredValue } from 'react'
 import { api } from '@/lib/api'
 import { errorToast, keys, useAddToCart, useCart } from '@/lib/queries'
@@ -118,9 +118,11 @@ export function NotificationBell() {
 
   const unread = q.data?.unread ?? 0
   return (
-    <div ref={ref} className="relative">
-      <button aria-label="Notifications" onClick={() => setOpen((v) => !v)} className="relative grid size-10 place-items-center rounded-full hover:bg-surface-2">
-        <Bell className="size-5" />
+    // Not `relative` on phones: the panel then anchors to the (sticky) header and
+    // spans the screen width instead of hanging off the bell and running off-screen.
+    <div ref={ref} className="sm:relative">
+      <button aria-label="Notifications" onClick={() => setOpen((v) => !v)} className="relative grid size-9 shrink-0 place-items-center rounded-lg text-muted hover:bg-surface-2 hover:text-fg">
+        <Bell className="size-[18px]" />
         <AnimatePresence>
           {unread > 0 && (
             <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="absolute top-1 right-1 grid h-4 min-w-4 place-items-center rounded-full bg-clay px-1 text-[10px] font-bold text-white">
@@ -132,12 +134,12 @@ export function NotificationBell() {
       <AnimatePresence>
         {open && (
           <motion.div initial={{ opacity: 0, y: -6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -6 }}
-            className="absolute right-0 z-50 mt-2 w-[min(92vw,380px)] overflow-hidden rounded-xl border border-line bg-surface shadow-2xl">
+            className="absolute inset-x-3 top-full z-50 mt-1 overflow-hidden rounded-xl border border-line bg-surface shadow-2xl sm:inset-x-auto sm:top-auto sm:right-0 sm:mt-2 sm:w-[380px]">
             <div className="flex items-center justify-between border-b border-line px-4 py-3">
               <span className="font-semibold">Notifications</span>
               {unread > 0 && <button onClick={() => markAll.mutate(undefined)} className="text-xs font-semibold text-muted hover:text-fg">Mark all read</button>}
             </div>
-            <div className="max-h-[60vh] overflow-y-auto">
+            <div className="max-h-[min(60vh,32rem)] overflow-y-auto overscroll-contain">
               {q.data?.items.length ? q.data.items.map((n) => (
                 <button
                   key={n.id}
@@ -282,6 +284,9 @@ export function SupportWidget() {
   const [open, setOpen] = useState(false)
   const qc = useQueryClient()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
+  // The community chat has its own composer in the bottom-right corner on phones.
+  const hideLauncherOnPhone = pathname.startsWith('/community')
   const rooms = useQuery({ queryKey: keys.rooms, queryFn: () => api.get<{ support: ChatRoom[]; community: ChatRoom[] }>('/chat/rooms'), enabled: !!session && !isStaff })
   const active = rooms.data?.support.find((r) => r.status !== 'resolved')
   const start = useMutation({
@@ -303,7 +308,7 @@ export function SupportWidget() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => (session ? setOpen((v) => !v) : navigate('/login?next=/'))}
-        className="fixed right-5 bottom-5 z-40 flex h-11 items-center gap-2 rounded-full bg-primary px-4 text-sm font-medium text-primary-fg shadow-lg"
+        className={cn('fixed right-4 bottom-4 z-40 flex h-11 items-center gap-2 rounded-full bg-primary px-4 text-sm font-medium text-primary-fg shadow-lg sm:right-5 sm:bottom-5', hideLauncherOnPhone && !open && 'max-md:hidden')}
       >
         {open ? <X className="size-4" /> : <MessageCircle className="size-4" />}
         <span className="hidden sm:inline">Need help?</span>
@@ -312,7 +317,7 @@ export function SupportWidget() {
       <AnimatePresence>
         {open && (
           <motion.div initial={{ opacity: 0, y: 20, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.96 }}
-            className="fixed right-5 bottom-20 z-40 flex h-[min(560px,75vh)] w-[min(380px,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-xl">
+            className="fixed right-4 bottom-18 z-40 flex h-[min(560px,75dvh)] w-[min(380px,calc(100vw-2rem))] sm:right-5 sm:bottom-20 flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-xl">
             <div className="border-b border-line p-4">
               <div className="flex items-center gap-2 font-semibold"><Sprout className="size-4" /> Plant help</div>
               <p className="text-sm text-muted">Our team usually replies within a few minutes.</p>

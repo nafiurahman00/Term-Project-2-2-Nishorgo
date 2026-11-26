@@ -31,13 +31,13 @@ export default function Garden() {
       </PageHeader>
 
       {garden.isLoading ? <Skeleton className="h-40 rounded-2xl" /> : g && (
-        <div className="mb-10 grid gap-4 md:grid-cols-4">
+        <div className="mb-8 grid grid-cols-2 gap-3 sm:gap-4 md:mb-10 md:grid-cols-4">
           <Stat icon={<Flame className="size-5 text-orange-500" />} label="Care streak" value={`${g.streak.current} day${g.streak.current === 1 ? '' : 's'}`} sub={`Best streak: ${g.streak.best} day${g.streak.best === 1 ? '' : 's'}`} highlight={g.streak.current >= 3} />
           <Stat icon={<Leaf className="size-5 text-forest-500" />} label="Plants" value={String(g.plants.length)} sub={`${attention.length} need attention`} />
           <Stat icon={<CalendarCheck className="size-5 text-sky-500" />} label="This week" value={`${g.week.tasks_done} tasks`} sub={`Active ${g.week.days_active} of 7 days`} />
-          <div className="flex items-center gap-4 rounded-2xl border border-line bg-surface p-5">
+          <div className="flex min-w-0 flex-col items-start gap-2 rounded-xl border border-line bg-surface p-4 sm:flex-row sm:items-center sm:gap-4 sm:p-5">
             <ProgressRing value={avgHealth} size={72} stroke={7}>{avgHealth}%</ProgressRing>
-            <div><div className="text-sm font-medium">Garden health</div><div className="text-sm text-muted">Average across all plants</div></div>
+            <div><div className="text-sm font-medium">Garden health</div><div className="text-xs text-muted sm:text-sm">Average across all plants</div></div>
           </div>
         </div>
       )}
@@ -51,12 +51,14 @@ export default function Garden() {
         <EmptyState emoji="🪴" title="Your garden is empty" action={<div className="flex gap-3"><Link to="/shop"><Button>Shop plants</Button></Link><Button variant="outline" onClick={() => setAdding(true)}>Add one you own</Button></div>}>
           Buy a plant and it'll appear here on delivery — or add plants you already have.
         </EmptyState>
-      ) : (
-        <motion.div layout className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      ) : g && (
+        // Rendered only once data is in: an empty grid parked under the loading
+        // skeleton would otherwise slide down over the stats when they appear.
+        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
           <AnimatePresence>
             {shown.map((p) => <PlantTile key={p.id} p={p} />)}
           </AnimatePresence>
-        </motion.div>
+        </div>
       )}
       <AddPlantModal open={adding} onClose={() => setAdding(false)} />
     </Container>
@@ -65,9 +67,9 @@ export default function Garden() {
 
 function Stat({ icon, label, value, sub, highlight }: { icon: React.ReactNode; label: string; value: string; sub: string; highlight?: boolean }) {
   return (
-    <div className={cn('rounded-xl border border-line p-5', highlight ? 'bg-accent text-accent-fg' : 'bg-surface')}>
-      <div className="mb-2 flex items-center gap-2 text-sm text-muted">{icon}{label}</div>
-      <div className="text-2xl font-semibold">{value}</div>
+    <div className={cn('min-w-0 rounded-xl border border-line p-4 sm:p-5', highlight ? 'bg-accent text-accent-fg' : 'bg-surface')}>
+      <div className="mb-2 flex items-center gap-2 text-sm text-muted">{icon}<span className="truncate">{label}</span></div>
+      <div className="text-xl font-semibold sm:text-2xl">{value}</div>
       <div className="mt-1 text-xs opacity-70">{sub}</div>
     </div>
   )
