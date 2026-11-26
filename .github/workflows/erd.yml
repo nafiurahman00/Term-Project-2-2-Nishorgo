@@ -25,7 +25,7 @@ jobs:
 
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 3.4.0  # pinned: "latest" queries the GitHub API and can hit its rate limit
 
       - name: Start Supabase (applies all migrations)
         # The migrations use storage and realtime, so start the full stack minus the UI/logging services.
