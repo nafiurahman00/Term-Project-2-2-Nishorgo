@@ -91,6 +91,11 @@
   h1, h2, h3 { letter-spacing: -0.02em; text-wrap: balance; }
   p { text-wrap: pretty; }
   input[type='number']::-webkit-inner-spin-button { -webkit-appearance: none; }
+  /* Native dropdown lists: Chrome (Windows/Linux) paints them from the <select>'s
+     own background, which is translucent here, so it falls back to white while the
+     text stays light in dark mode. Give the options solid theme colours. */
+  select option, select optgroup { background-color: var(--surface); color: var(--fg); }
+  select option:checked { background-color: var(--accent); color: var(--accent-fg); }
 }
 
 @layer components {
