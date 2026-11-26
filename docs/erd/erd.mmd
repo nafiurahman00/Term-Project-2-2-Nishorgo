@@ -1,0 +1,172 @@
+erDiagram
+  addresses {
+    bigint id PK
+    uuid user_id FK
+  }
+  profiles {
+    uuid id PK, FK
+    citext username UK "nullable"
+  }
+  categories {
+    smallint id PK
+    text slug UK
+    text name UK
+  }
+  inventory_movements {
+    bigint id PK
+    bigint product_id FK
+    uuid order_id FK "nullable"
+    uuid created_by FK "nullable"
+  }
+  products {
+    bigint id PK
+    text slug UK
+    smallint category_id FK
+  }
+  cart_items {
+    uuid user_id PK, FK
+    bigint product_id PK, FK
+  }
+  loyalty_ledger {
+    bigint id PK
+    uuid user_id FK
+    uuid order_id FK "nullable"
+  }
+  notifications {
+    bigint id PK
+    uuid user_id FK
+  }
+  wishlist_items {
+    uuid user_id PK, FK
+    bigint product_id PK, FK
+  }
+  coupon_redemptions {
+    bigint coupon_id PK, FK
+    uuid order_id PK, FK
+    uuid user_id FK
+  }
+  coupons {
+    bigint id PK
+    citext code UK
+  }
+  order_items {
+    bigint id PK
+    uuid order_id FK
+    bigint product_id FK "nullable"
+  }
+  order_status_history {
+    bigint id PK
+    uuid order_id FK
+    uuid changed_by FK "nullable"
+  }
+  orders {
+    uuid id PK
+    text order_number UK
+    uuid user_id FK
+    bigint coupon_id FK "nullable"
+    text stripe_checkout_session_id UK "nullable"
+    text stripe_payment_intent_id UK "nullable"
+  }
+  stripe_events {
+    text id PK
+  }
+  care_logs {
+    bigint id PK
+    bigint plant_id FK
+    uuid user_id FK
+  }
+  garden_plants {
+    bigint id PK
+    uuid user_id FK
+    bigint product_id FK "nullable"
+    bigint source_order_item_id FK "nullable"
+  }
+  review_votes {
+    bigint review_id PK, FK
+    uuid user_id PK, FK
+  }
+  reviews {
+    bigint id PK
+    bigint product_id FK
+    uuid user_id FK
+  }
+  audit_log {
+    bigint id PK
+  }
+  mv_daily_sales {
+    date day UK "nullable"
+  }
+  journal_posts {
+    bigint id PK
+    text slug UK
+    uuid author_id FK "nullable"
+  }
+  chat_members {
+    uuid room_id PK, FK
+    uuid user_id PK, FK
+  }
+  chat_messages {
+    bigint id PK
+    uuid room_id FK
+    uuid sender_id FK "nullable"
+    bigint reply_to FK "nullable"
+  }
+  chat_reactions {
+    bigint message_id PK, FK
+    uuid room_id FK
+    uuid user_id PK, FK
+    text emoji PK
+  }
+  chat_rooms {
+    uuid id PK
+    text slug UK "nullable"
+    uuid customer_id FK "nullable"
+    uuid order_id FK "nullable"
+    uuid assigned_to FK "nullable"
+  }
+  auth_users {
+    uuid id PK
+  }
+  profiles ||..o{ addresses : "user_id"
+  garden_plants ||..o{ care_logs : "plant_id"
+  profiles ||..o{ care_logs : "user_id"
+  products ||--o{ cart_items : "product_id"
+  profiles ||--o{ cart_items : "user_id"
+  chat_rooms ||--o{ chat_members : "room_id"
+  profiles ||--o{ chat_members : "user_id"
+  chat_messages |o..o{ chat_messages : "reply_to"
+  chat_rooms ||..o{ chat_messages : "room_id"
+  profiles |o..o{ chat_messages : "sender_id"
+  chat_messages ||--o{ chat_reactions : "message_id"
+  chat_rooms ||..o{ chat_reactions : "room_id"
+  profiles ||--o{ chat_reactions : "user_id"
+  profiles |o..o{ chat_rooms : "assigned_to"
+  profiles |o..o{ chat_rooms : "customer_id"
+  orders |o..o{ chat_rooms : "order_id"
+  coupons ||--o{ coupon_redemptions : "coupon_id"
+  orders ||--o{ coupon_redemptions : "order_id"
+  profiles ||..o{ coupon_redemptions : "user_id"
+  products |o..o{ garden_plants : "product_id"
+  order_items |o..o{ garden_plants : "source_order_item_id"
+  profiles ||..o{ garden_plants : "user_id"
+  profiles |o..o{ inventory_movements : "created_by"
+  orders |o..o{ inventory_movements : "order_id"
+  products ||..o{ inventory_movements : "product_id"
+  profiles |o..o{ journal_posts : "author_id"
+  orders |o..o{ loyalty_ledger : "order_id"
+  profiles ||..o{ loyalty_ledger : "user_id"
+  profiles ||..o{ notifications : "user_id"
+  orders ||..o{ order_items : "order_id"
+  products |o..o{ order_items : "product_id"
+  profiles |o..o{ order_status_history : "changed_by"
+  orders ||..o{ order_status_history : "order_id"
+  coupons |o..o{ orders : "coupon_id"
+  profiles ||..o{ orders : "user_id"
+  categories ||..o{ products : "category_id"
+  auth_users ||--o| profiles : "id"
+  reviews ||--o{ review_votes : "review_id"
+  profiles ||--o{ review_votes : "user_id"
+  products ||..o{ reviews : "product_id"
+  profiles ||..o{ reviews : "user_id"
+  products ||--o{ wishlist_items : "product_id"
+  profiles ||--o{ wishlist_items : "user_id"

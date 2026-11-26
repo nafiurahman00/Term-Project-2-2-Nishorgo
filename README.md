@@ -78,6 +78,8 @@ user's data.
 | `12 platform` | Realtime publication, Storage buckets + policies, 4 pg_cron jobs, care-reminder generator |
 | `13 realtime chat` | rooms, messages, reactions, DB-level rate limiting, broadcast-from-database purchase feed |
 
+**ERD:** [`docs/erd`](docs/erd) has the entity-relationship diagram (crow's-foot notation with keys and multiplicity), per-domain diagrams and a full data dictionary. All of it is generated from the live schema by `node supabase/scripts/erd/generate.mjs` and rebuilt by CI whenever a migration changes.
+
 Totals: **25 tables · 90+ functions · 42 triggers · 53 RLS policies · 1 materialized view · 4 cron jobs.**
 
 Invariants enforced by the database (and covered by tests):

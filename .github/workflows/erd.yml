@@ -1,0 +1,56 @@
+# Regenerates docs/erd (ERD + data dictionary) from the real schema whenever the
+# migrations change, and commits the result back to main.
+name: ERD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - supabase/migrations/**
+      - supabase/scripts/erd/**
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: erd
+  cancel-in-progress: true
+
+jobs:
+  erd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase (applies all migrations)
+        # The migrations use storage and realtime, so start the full stack minus the UI/logging services.
+        run: supabase start -x studio,imgproxy,edge-runtime,logflare,vector
+
+      - name: Install Graphviz
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq graphviz postgresql-client
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Generate ERD
+        env:
+          DB_URL: postgresql://postgres:postgres@localhost:55322/postgres
+        run: node supabase/scripts/erd/generate.mjs
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- docs/erd && [ -z "$(git ls-files --others --exclude-standard docs/erd)" ]; then
+            echo "ERD already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/erd
+          git commit -m "Regenerate ERD from schema"
+          git push
