@@ -3,7 +3,10 @@
 # Supabase itself runs via `npx supabase start` (local) or is hosted.
 services:
   api:
-    build: ./backend
+    build:
+      context: ./backend
+      # Kept out of backend/'s root so Vercel doesn't auto-detect a container project.
+      dockerfile: docker/Dockerfile
     env_file: ./backend/.env
     ports:
       - "8000:8000"

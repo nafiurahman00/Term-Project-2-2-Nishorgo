@@ -10,5 +10,5 @@
 /storage/framework/views/*
 /storage/framework/sessions/*
 /node_modules
-Dockerfile
-phpunit.xml
+/docker
+/phpunit.xml

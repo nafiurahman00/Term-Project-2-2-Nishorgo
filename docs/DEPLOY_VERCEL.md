@@ -111,5 +111,5 @@ Environment variables still go in the dashboard, or use `npx vercel env add NAME
 | First request after a while is slow (~1–2 s) | Serverless cold start. That's expected. |
 
 **Note:** the `vercel-php` community runtime was archived in October 2026. Its published versions keep working, but
-it won't get updates. If it ever stops building, deploy `backend/` with its `Dockerfile` to Render, Railway or Fly
+it won't get updates. If it ever stops building, deploy `backend/` with `backend/docker/Dockerfile` to Render, Railway or Fly
 instead. The code doesn't change, only the rewrite URL in `frontend/vercel.json` does.
