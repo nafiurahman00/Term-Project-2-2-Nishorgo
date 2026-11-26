@@ -85,7 +85,8 @@ Supabase dashboard → **Authentication**:
 
 1. Stripe Dashboard (test mode) → **Developers → Webhooks → Add endpoint**
    - URL: `https://nishorgo-store.vercel.app/api/stripe/webhook`
-   - Events: `checkout.session.completed`, `checkout.session.expired`, `charge.refunded`
+   - Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`,
+     `checkout.session.expired`, `checkout.session.async_payment_failed`
 2. Copy the signing secret into `STRIPE_WEBHOOK_SECRET` on the **API** project, set `STRIPE_SECRET_KEY`, set
    `DEMO_PAYMENTS=false`, and redeploy the API.
 
